@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="FIT4110 Lab04 A4 AI Vision Docker Verification" tests="11" time="0.064">
-  <testsuite name="01_Functional / GET health returns 200" id="2e33fbed-3f84-4444-b8e8-ff0979269980" timestamp="2026-06-03T04:06:11.737Z" tests="2" failures="0" errors="0" time="0.024">
-    <testcase name="Status code is 200" time="0.024" classname="01FunctionalGetHealthReturns200"/>
-    <testcase name="Response has AI Vision service name" time="0.024" classname="01FunctionalGetHealthReturns200"/>
+<testsuites name="FIT4110 Lab04 A4 AI Vision Docker Verification" tests="11" time="0.069">
+  <testsuite name="01_Functional / GET health returns 200" id="4c202f63-6e8f-44a8-93a5-fd70ece69305" timestamp="2026-06-03T04:14:36.223Z" tests="2" failures="0" errors="0" time="0.033">
+    <testcase name="Status code is 200" time="0.033" classname="01FunctionalGetHealthReturns200"/>
+    <testcase name="Response has AI Vision service name" time="0.033" classname="01FunctionalGetHealthReturns200"/>
   </testsuite>
-  <testsuite name="01_Functional / POST valid image analysis returns 201" id="bc8e84f4-9bbe-401d-a9c1-c9ea9ceca7c6" timestamp="2026-06-03T04:06:11.737Z" tests="2" failures="0" errors="0" time="0.006">
+  <testsuite name="01_Functional / POST valid image analysis returns 201" id="05387106-29cb-459e-aa3c-dad89e709da0" timestamp="2026-06-03T04:14:36.223Z" tests="2" failures="0" errors="0" time="0.006">
     <testcase name="Status code is 201" time="0.006" classname="01FunctionalPostValidImageAnalysisReturns201"/>
     <testcase name="Response follows AI Vision schema" time="0.006" classname="01FunctionalPostValidImageAnalysisReturns201"/>
   </testsuite>
-  <testsuite name="01_Functional / GET latest vision results returns items array" id="62779435-c0e1-4917-ac23-614f0b990897" timestamp="2026-06-03T04:06:11.737Z" tests="2" failures="0" errors="0" time="0.004">
+  <testsuite name="01_Functional / GET latest vision results returns items array" id="80e6ff06-0296-406b-946f-6f9542410d56" timestamp="2026-06-03T04:14:36.223Z" tests="2" failures="0" errors="0" time="0.004">
     <testcase name="Status code is 200" time="0.004" classname="01FunctionalGetLatestVisionResultsReturnsItemsArray"/>
     <testcase name="Response has items array" time="0.004" classname="01FunctionalGetLatestVisionResultsReturnsItemsArray"/>
   </testsuite>
-  <testsuite name="01_Functional / GET saved analysis result returns 200" id="47690076-4613-4f5f-aa95-49aaf69f3902" timestamp="2026-06-03T04:06:11.737Z" tests="2" failures="0" errors="0" time="0.007">
-    <testcase name="Status code is 200" time="0.007" classname="01FunctionalGetSavedAnalysisResultReturns200"/>
-    <testcase name="Response analysis_id matches saved variable" time="0.007" classname="01FunctionalGetSavedAnalysisResultReturns200"/>
+  <testsuite name="01_Functional / GET saved analysis result returns 200" id="9d9d37f0-eb49-4b59-b323-bc80e865be47" timestamp="2026-06-03T04:14:36.223Z" tests="2" failures="0" errors="0" time="0.006">
+    <testcase name="Status code is 200" time="0.006" classname="01FunctionalGetSavedAnalysisResultReturns200"/>
+    <testcase name="Response analysis_id matches saved variable" time="0.006" classname="01FunctionalGetSavedAnalysisResultReturns200"/>
   </testsuite>
-  <testsuite name="02_Auth / POST analyze without token returns 401" id="459fd543-55d9-42f2-a338-aa4191fbfb21" timestamp="2026-06-03T04:06:11.737Z" tests="1" failures="0" errors="0" time="0.004">
-    <testcase name="Missing token returns 401" time="0.004" classname="02AuthPostAnalyzeWithoutTokenReturns401"/>
+  <testsuite name="02_Auth / POST analyze without token returns 401" id="85f905ae-a52b-4236-9eb2-1ff114830d5c" timestamp="2026-06-03T04:14:36.223Z" tests="1" failures="0" errors="0" time="0.003">
+    <testcase name="Missing token returns 401" time="0.003" classname="02AuthPostAnalyzeWithoutTokenReturns401"/>
   </testsuite>
-  <testsuite name="02_Auth / POST analyze with wrong token returns 401" id="0ce28239-f311-4c54-bea3-97df6d5d7c5d" timestamp="2026-06-03T04:06:11.737Z" tests="1" failures="0" errors="0" time="0.003">
+  <testsuite name="02_Auth / POST analyze with wrong token returns 401" id="732d4364-ce5b-4ad4-8a99-cb1170cc2b7e" timestamp="2026-06-03T04:14:36.223Z" tests="1" failures="0" errors="0" time="0.003">
     <testcase name="Wrong token returns 401" time="0.003" classname="02AuthPostAnalyzeWithWrongTokenReturns401"/>
   </testsuite>
-  <testsuite name="03_Negative / POST analyze missing camera_id returns validation error" id="738a9aa6-318a-4c0f-accb-0911ee115f0a" timestamp="2026-06-03T04:06:11.737Z" tests="1" failures="0" errors="0" time="0.002">
+  <testsuite name="03_Negative / POST analyze missing camera_id returns validation error" id="c491ad93-fb17-4af1-a75e-1d7d8aaf2531" timestamp="2026-06-03T04:14:36.223Z" tests="1" failures="0" errors="0" time="0.002">
     <testcase name="Missing required field returns 422" time="0.002" classname="03NegativePostAnalyzeMissingCameraIdReturnsValidationError"/>
   </testsuite>
-  <testsuite name="03_Negative / POST analyze invalid image_url returns validation error" id="6b23dd09-1f1d-41d6-9786-82ba81edd4fa" timestamp="2026-06-03T04:06:11.737Z" tests="1" failures="0" errors="0" time="0.004">
-    <testcase name="Invalid image_url returns 422" time="0.004" classname="03NegativePostAnalyzeInvalidImageUrlReturnsValidationError"/>
+  <testsuite name="03_Negative / POST analyze invalid image_url returns validation error" id="f3d7a95d-65a6-4c58-88f2-108f5a5fd063" timestamp="2026-06-03T04:14:36.223Z" tests="1" failures="0" errors="0" time="0.002">
+    <testcase name="Invalid image_url returns 422" time="0.002" classname="03NegativePostAnalyzeInvalidImageUrlReturnsValidationError"/>
   </testsuite>
-  <testsuite name="04_Boundary_Reliability / POST unknown person returns high risk" id="6170b128-8c88-4e78-aa9c-2e17bb279b40" timestamp="2026-06-03T04:06:11.737Z" tests="2" failures="0" errors="0" time="0.004">
+  <testsuite name="04_Boundary_Reliability / POST unknown person returns high risk" id="663cc49b-4624-4b87-ab9f-74c4b08b528f" timestamp="2026-06-03T04:14:36.223Z" tests="2" failures="0" errors="0" time="0.004">
     <testcase name="High risk detection returns 201" time="0.004" classname="04BoundaryReliabilityPostUnknownPersonReturnsHighRisk"/>
     <testcase name="Unknown person maps to high risk" time="0.004" classname="04BoundaryReliabilityPostUnknownPersonReturnsHighRisk"/>
   </testsuite>
-  <testsuite name="04_Boundary_Reliability / POST no motion returns low risk no detection" id="b04c0bbc-5b30-44f8-8f44-57a0e6212129" timestamp="2026-06-03T04:06:11.737Z" tests="2" failures="0" errors="0" time="0.004">
-    <testcase name="No-motion frame returns 201" time="0.004" classname="04BoundaryReliabilityPostNoMotionReturnsLowRiskNoDetection"/>
-    <testcase name="No-motion frame maps to low risk" time="0.004" classname="04BoundaryReliabilityPostNoMotionReturnsLowRiskNoDetection"/>
+  <testsuite name="04_Boundary_Reliability / POST no motion returns low risk no detection" id="180b71da-777e-4f55-9664-e0301c3cabd1" timestamp="2026-06-03T04:14:36.223Z" tests="2" failures="0" errors="0" time="0.003">
+    <testcase name="No-motion frame returns 201" time="0.003" classname="04BoundaryReliabilityPostNoMotionReturnsLowRiskNoDetection"/>
+    <testcase name="No-motion frame maps to low risk" time="0.003" classname="04BoundaryReliabilityPostNoMotionReturnsLowRiskNoDetection"/>
   </testsuite>
-  <testsuite name="04_Boundary_Reliability / GET health responds under 1000ms on container" id="8518fdcd-b7dd-4d80-80e1-aef2be9f188c" timestamp="2026-06-03T04:06:11.737Z" tests="2" failures="0" errors="0" time="0.002">
-    <testcase name="Response time is below 1000ms" time="0.002" classname="04BoundaryReliabilityGetHealthRespondsUnder1000MsOnContainer"/>
-    <testcase name="Health endpoint is reachable" time="0.002" classname="04BoundaryReliabilityGetHealthRespondsUnder1000MsOnContainer"/>
+  <testsuite name="04_Boundary_Reliability / GET health responds under 1000ms on container" id="6f6bd768-3dfd-4017-a0dd-2ff784081906" timestamp="2026-06-03T04:14:36.223Z" tests="2" failures="0" errors="0" time="0.003">
+    <testcase name="Response time is below 1000ms" time="0.003" classname="04BoundaryReliabilityGetHealthRespondsUnder1000MsOnContainer"/>
+    <testcase name="Health endpoint is reachable" time="0.003" classname="04BoundaryReliabilityGetHealthRespondsUnder1000MsOnContainer"/>
   </testsuite>
 </testsuites>

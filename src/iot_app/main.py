@@ -240,13 +240,22 @@ def run_mock_ai(payload: VisionAnalyzeRequest) -> Dict:
     }
 
 
-@app.get("/health", response_model=HealthResponse)
-def health() -> HealthResponse:
+def health_payload() -> HealthResponse:
     return HealthResponse(
         status="ok",
         service=SERVICE_NAME,
         version=SERVICE_VERSION,
     )
+
+
+@app.get("/health", response_model=HealthResponse)
+def health() -> HealthResponse:
+    return health_payload()
+
+
+@app.head("/health", status_code=status.HTTP_200_OK)
+def health_head() -> None:
+    return None
 
 
 @app.post(
