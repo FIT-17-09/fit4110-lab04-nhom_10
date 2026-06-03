@@ -1,16 +1,16 @@
-# Submission Checklist – Lab 04
+# Submission Checklist - Lab 04
 
-Nộp các minh chứng sau:
+Evidence to submit:
 
-- [ ] `Dockerfile`
-- [ ] `.dockerignore`
-- [ ] `.env.example`
-- [ ] `RUN_LOCAL.md`
-- [ ] Contract OpenAPI đã dùng
-- [ ] Postman Collection đã chạy trên container
-- [ ] Postman Environment local/docker
-- [ ] Newman report XML/HTML
-- [ ] Log hoặc ảnh `docker build`
-- [ ] Log hoặc ảnh `docker run`
-- [ ] Log hoặc ảnh `GET /health`
-- [ ] Link hoặc tên image tag đã push
+- [x] `Dockerfile`
+- [x] `.dockerignore`
+- [x] `.env.example`
+- [x] `RUN_LOCAL.md`
+- [x] OpenAPI contract used for A4 AI Vision testing
+- [x] Postman Collection tested against the AI Vision container
+- [x] Postman local/docker environment
+- [x] Newman XML/HTML reports
+- [x] Docker build log or screenshot
+- [x] Docker run log or screenshot
+- [x] `GET /health` log or screenshot
+- [x] Image tag name: `vietduck53vb2/fit4110-lab04-ai-vision:v0.1.0-a4-ai-vision`

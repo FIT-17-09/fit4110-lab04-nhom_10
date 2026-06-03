@@ -1,0 +1,7 @@
+{
+  "camera_id": "cam-gate-01",
+  "image_url": "not-a-url",
+  "timestamp": "2026-05-02T09:10:00+07:00",
+  "zone": "main_gate",
+  "motion_detected": true
+}

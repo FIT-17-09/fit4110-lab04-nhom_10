@@ -1,0 +1,18 @@
+services:
+  ai-vision:
+    build: .
+    image: fit4110/ai-vision:lab04
+    container_name: fit4110-ai-vision-lab04
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env.example
+    environment:
+      CORE_SERVICE_URL: http://core-business:8000
+      ANALYTICS_SERVICE_URL: http://analytics:8000
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

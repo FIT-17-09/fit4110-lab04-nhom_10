@@ -1,0 +1,329 @@
+openapi: 3.1.0
+info:
+  title: FIT4110 Lab 04 - A4 Product A AI Vision API
+  version: 0.4.0
+  contact:
+    name: FIT4110 A4 Product A nhom_10
+  description: |
+    API contract for the Product A AI Vision service in the Smart Campus Operations Platform.
+    The service receives image frames from Camera Stream, runs mock AI image analysis, and
+    returns detection results for Core Business and Analytics.
+servers:
+  - url: http://localhost:8000
+    description: Local or Docker container service
+  - url: http://localhost:4010
+    description: Prism mock server
+tags:
+  - name: system
+    description: Health and runtime information
+  - name: vision
+    description: Image analysis and detection results
+
+security:
+  - bearerAuth: []
+
+paths:
+  /health:
+    get:
+      tags: [system]
+      operationId: getHealth
+      summary: Check service health
+      description: Public endpoint used by Docker HEALTHCHECK and integration smoke tests.
+      security: []
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+              examples:
+                ok:
+                  value:
+                    status: ok
+                    service: ai-vision
+                    version: 0.4.0
+
+  /vision/analyze:
+    post:
+      tags: [vision]
+      operationId: analyzeImage
+      summary: Analyze an image frame
+      description: Receives an image URL from Camera Stream and returns a mock AI detection result.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VisionAnalyzeRequest"
+            examples:
+              valid_person:
+                value:
+                  camera_id: cam-gate-01
+                  image_url: http://example.com/frame.jpg
+                  timestamp: "2026-05-02T09:10:00+07:00"
+                  zone: main_gate
+                  motion_detected: true
+              high_risk_stranger:
+                value:
+                  camera_id: cam-restricted-01
+                  image_url: http://example.com/unknown-person.jpg
+                  timestamp: "2026-05-02T22:10:00+07:00"
+                  zone: restricted_lab
+                  motion_detected: true
+      responses:
+        "201":
+          description: Image was analyzed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VisionAnalysisResult"
+              examples:
+                analyzed:
+                  value:
+                    analysis_id: VIS-20260502-0001
+                    camera_id: cam-gate-01
+                    detected: true
+                    object: person
+                    confidence: 0.91
+                    risk_level: medium
+                    detections:
+                      - object: person
+                        confidence: 0.91
+                        bbox: [120, 48, 340, 420]
+                    core_event_url: http://core-business:8000/events/vision
+                    analytics_event_url: http://analytics:8000/events/vision
+                    created_at: "2026-05-02T02:10:01+00:00"
+        "401":
+          description: Missing or invalid bearer token
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "422":
+          description: Invalid image analysis request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+
+  /vision/results/latest:
+    get:
+      tags: [vision]
+      operationId: getLatestVisionResults
+      summary: Get latest analysis results
+      description: Returns recent AI Vision results, optionally filtered by camera_id.
+      parameters:
+        - in: query
+          name: camera_id
+          required: false
+          schema:
+            type: string
+          example: cam-gate-01
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+          example: 5
+      responses:
+        "200":
+          description: Latest analysis results
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/VisionAnalysisResult"
+        "401":
+          description: Missing or invalid bearer token
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+
+  /vision/results/{analysis_id}:
+    get:
+      tags: [vision]
+      operationId: getVisionResultById
+      summary: Get one analysis result
+      description: Returns one stored AI Vision analysis result by id.
+      parameters:
+        - name: analysis_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^VIS-[0-9]{8}-[0-9]{4}$"
+          example: VIS-20260502-0001
+      responses:
+        "200":
+          description: Analysis result detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VisionAnalysisResult"
+        "401":
+          description: Missing or invalid bearer token
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "404":
+          description: Analysis result was not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: token
+
+  schemas:
+    RiskLevel:
+      type: string
+      enum: [low, medium, high]
+
+    DetectedObject:
+      type: string
+      enum: [person, stranger, vehicle, bag, none]
+
+    VisionAnalyzeRequest:
+      type: object
+      required: [camera_id, image_url, timestamp]
+      properties:
+        camera_id:
+          type: string
+          minLength: 3
+          example: cam-gate-01
+        image_url:
+          type: string
+          format: uri
+          example: http://example.com/frame.jpg
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-05-02T09:10:00+07:00"
+        zone:
+          type: string
+          default: main_gate
+          example: main_gate
+        motion_detected:
+          type: boolean
+          default: true
+          example: true
+
+    Detection:
+      type: object
+      required: [object, confidence, bbox]
+      properties:
+        object:
+          $ref: "#/components/schemas/DetectedObject"
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+          example: 0.91
+        bbox:
+          type: array
+          minItems: 4
+          maxItems: 4
+          items:
+            type: integer
+          example: [120, 48, 340, 420]
+
+    VisionAnalysisResult:
+      type: object
+      required:
+        - analysis_id
+        - camera_id
+        - detected
+        - object
+        - confidence
+        - risk_level
+        - detections
+        - core_event_url
+        - analytics_event_url
+        - created_at
+      properties:
+        analysis_id:
+          type: string
+          pattern: "^VIS-[0-9]{8}-[0-9]{4}$"
+          example: VIS-20260502-0001
+        camera_id:
+          type: string
+          example: cam-gate-01
+        detected:
+          type: boolean
+          example: true
+        object:
+          $ref: "#/components/schemas/DetectedObject"
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+          example: 0.91
+        risk_level:
+          $ref: "#/components/schemas/RiskLevel"
+        detections:
+          type: array
+          items:
+            $ref: "#/components/schemas/Detection"
+        core_event_url:
+          type: string
+          example: http://core-business:8000/events/vision
+        analytics_event_url:
+          type: string
+          example: http://analytics:8000/events/vision
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-05-02T02:10:01+00:00"
+
+    HealthResponse:
+      type: object
+      required: [status, service, version]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+          example: ok
+        service:
+          type: string
+          example: ai-vision
+        version:
+          type: string
+          example: 0.4.0
+
+    ProblemDetails:
+      type: object
+      required: [type, title, status, detail]
+      properties:
+        type:
+          type: string
+          example: https://smart-campus.local/problems/validation-error
+        title:
+          type: string
+          example: Validation error
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+          example: 422
+        detail:
+          type: string
+          example: body.image_url must be a valid URL
+        instance:
+          type: string
+          example: /vision/analyze

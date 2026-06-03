@@ -1,0 +1,303 @@
+{
+  "info": {
+    "name": "FIT4110 Lab04 A4 AI Vision Docker Verification",
+    "description": "Verifies the Dockerized Product A AI Vision service with functional, auth, negative, boundary, and reliability tests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01_Functional",
+      "item": [
+        {
+          "name": "GET health returns 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response has AI Vision service name', function () { const json = pm.response.json(); pm.expect(json.status).to.eql('ok'); pm.expect(json.service).to.eql('ai-vision'); pm.expect(json).to.have.property('version'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST valid image analysis returns 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/vision/analyze",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"camera_id\": \"cam-gate-01\",\n  \"image_url\": \"http://example.com/frame.jpg\",\n  \"timestamp\": \"2026-05-02T09:10:00+07:00\",\n  \"zone\": \"main_gate\",\n  \"motion_detected\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 201', function () { pm.response.to.have.status(201); });",
+                  "pm.test('Response follows AI Vision schema', function () { const json = pm.response.json(); pm.expect(json.analysis_id).to.match(/^VIS-[0-9]{8}-[0-9]{4}$/); pm.expect(json.camera_id).to.eql('cam-gate-01'); pm.expect(json.detected).to.eql(true); pm.expect(json.object).to.eql('person'); pm.expect(json.confidence).to.be.within(0, 1); pm.expect(json.risk_level).to.eql('medium'); pm.expect(json.detections).to.be.an('array'); });",
+                  "const created = pm.response.json();",
+                  "if (created.analysis_id) { pm.environment.set('createdAnalysisId', created.analysis_id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET latest vision results returns items array",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": "{{baseUrl}}/vision/results/latest?camera_id=cam-gate-01&limit=5"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response has items array', function () { const json = pm.response.json(); pm.expect(json.items).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET saved analysis result returns 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": "{{baseUrl}}/vision/results/{{createdAnalysisId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response analysis_id matches saved variable', function () { const json = pm.response.json(); pm.expect(json.analysis_id).to.eql(pm.environment.get('createdAnalysisId')); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02_Auth",
+      "item": [
+        {
+          "name": "POST analyze without token returns 401",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/vision/analyze",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"camera_id\": \"cam-gate-01\",\n  \"image_url\": \"http://example.com/frame.jpg\",\n  \"timestamp\": \"2026-05-02T09:10:00+07:00\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Missing token returns 401', function () { pm.response.to.have.status(401); });",
+                  "const json = pm.response.json(); pm.expect(json.status).to.eql(401); pm.expect(json).to.have.property('detail');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST analyze with wrong token returns 401",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer wrong-token" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/vision/analyze",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"camera_id\": \"cam-gate-01\",\n  \"image_url\": \"http://example.com/frame.jpg\",\n  \"timestamp\": \"2026-05-02T09:10:00+07:00\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Wrong token returns 401', function () { pm.response.to.have.status(401); });",
+                  "const json = pm.response.json(); pm.expect(json.status).to.eql(401); pm.expect(json).to.have.property('type');"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03_Negative",
+      "item": [
+        {
+          "name": "POST analyze missing camera_id returns validation error",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/vision/analyze",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"image_url\": \"http://example.com/frame.jpg\",\n  \"timestamp\": \"2026-05-02T09:10:00+07:00\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Missing required field returns 422', function () { pm.response.to.have.status(422); });",
+                  "const json = pm.response.json(); pm.expect(json.status).to.eql(422); pm.expect(json.detail).to.include('camera_id');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST analyze invalid image_url returns validation error",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/vision/analyze",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"camera_id\": \"cam-gate-01\",\n  \"image_url\": \"not-a-url\",\n  \"timestamp\": \"2026-05-02T09:10:00+07:00\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Invalid image_url returns 422', function () { pm.response.to.have.status(422); });",
+                  "const json = pm.response.json(); pm.expect(json.status).to.eql(422); pm.expect(json).to.have.property('type');"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04_Boundary_Reliability",
+      "item": [
+        {
+          "name": "POST unknown person returns high risk",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/vision/analyze",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"camera_id\": \"cam-restricted-01\",\n  \"image_url\": \"http://example.com/unknown-person.jpg\",\n  \"timestamp\": \"2026-05-02T22:10:00+07:00\",\n  \"zone\": \"restricted_lab\",\n  \"motion_detected\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('High risk detection returns 201', function () { pm.response.to.have.status(201); });",
+                  "pm.test('Unknown person maps to high risk', function () { const json = pm.response.json(); pm.expect(json.object).to.eql('stranger'); pm.expect(json.risk_level).to.eql('high'); pm.expect(json.confidence).to.be.above(0.9); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST no motion returns low risk no detection",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/vision/analyze",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"camera_id\": \"cam-gate-01\",\n  \"image_url\": \"http://example.com/empty-frame.jpg\",\n  \"timestamp\": \"2026-05-02T09:10:00+07:00\",\n  \"zone\": \"main_gate\",\n  \"motion_detected\": false\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('No-motion frame returns 201', function () { pm.response.to.have.status(201); });",
+                  "pm.test('No-motion frame maps to low risk', function () { const json = pm.response.json(); pm.expect(json.detected).to.eql(false); pm.expect(json.object).to.eql('none'); pm.expect(json.risk_level).to.eql('low'); pm.expect(json.confidence).to.be.below(0.2); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET health responds under 1000ms on container",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response time is below 1000ms', function () { pm.expect(pm.response.responseTime).to.be.below(1000); });",
+                  "pm.test('Health endpoint is reachable', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
